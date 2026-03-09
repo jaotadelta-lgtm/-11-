@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>สอบหลักสูตรพราน</title>
+
+<style>
+body{
+font-family: Arial;
+background:#f4f4f4;
+text-align:center;
+}
+
+#login,#exam,#result{
+background:white;
+padding:20px;
+margin:30px auto;
+width:600px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+.question{
+text-align:left;
+margin-bottom:15px;
+}
+
+button{
+padding:10px 20px;
+font-size:16px;
+border:none;
+background:#2e86de;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+</style>
+
+</head>
+<body>
+
+<div id="login">
+<h2>เข้าสอบหลักสูตรพราน</h2>
+<input id="email" placeholder="กรอกอีเมล"><br><br>
+<button onclick="startExam()">เข้าสอบ</button>
+<p id="loginMsg"></p>
+</div>
+
+<div id="exam" style="display:none">
+<h2>ข้อสอบหลักสูตรพราน</h2>
+<div id="questions"></div>
+<button onclick="submitExam()">ยืนยันคำตอบ</button>
+</div>
+
+<div id="result" style="display:none">
+<h2>ผลคะแนน</h2>
+<h1 id="score"></h1>
+</div>
+
+<script>
+
+let emailUser=""
+let warning=0
+
+let questions=[
+{q:"1. หน่วยพรานมีหน้าที่หลักอะไร?",a:["ป้องกันประเทศ","ทำอาหาร","ขับรถ","ขายของ"],c:0},
+{q:"2. การพรางตัวใช้เพื่ออะไร?",a:["หลบซ่อน","ความสวยงาม","วิ่งเร็ว","นอน"],c:0},
+{q:"3. การเดินลาดตระเวนต้องทำอย่างไร?",a:["เงียบและระวัง","วิ่งเสียงดัง","เปิดเพลง","ตะโกน"],c:0},
+{q:"4. อาวุธต้องดูแลอย่างไร?",a:["ทำความสะอาด","โยนทิ้ง","แช่น้ำ","ไม่ต้องดูแล"],c:0},
+{q:"5. เข็มทิศใช้ทำอะไร?",a:["บอกทิศทาง","ทำอาหาร","นอน","ส่งข้อความ"],c:0},
+]
+
+for(let i=6;i<=30;i++){
+questions.push({
+q:i+". คำถามฝึกพรานข้อที่ "+i+" คืออะไร?",
+a:["คำตอบ A","คำตอบ B","คำตอบ C","คำตอบ D"],
+c:0
+})
+}
+
+function startExam(){
+
+let email=document.getElementById("email").value
+
+if(localStorage.getItem("ban_"+email)){
+document.getElementById("loginMsg").innerText="อีเมลนี้ถูกแบนจากการสอบ"
+return
+}
+
+emailUser=email
+
+document.getElementById("login").style.display="none"
+document.getElementById("exam").style.display="block"
+
+loadQuestions()
+}
+
+function loadQuestions(){
+
+let html=""
+
+questions.forEach((q,i)=>{
+
+html+=`<div class="question">
+<p>${q.q}</p>`
+
+q.a.forEach((ans,index)=>{
+
+html+=`
+<label>
+<input type="radio" name="q${i}" value="${index}">
+${ans}
+</label><br>
+`
+
+})
+
+html+="</div>"
+})
+
+document.getElementById("questions").innerHTML=html
+}
+
+function submitExam(){
+
+let score=0
+
+questions.forEach((q,i)=>{
+
+let ans=document.querySelector(`input[name=q${i}]:checked`)
+
+if(ans && ans.value==q.c){
+score++
+}
+
+})
+
+document.getElementById("exam").style.display="none"
+document.getElementById("result").style.display="block"
+
+document.getElementById("score").innerText=score+" / 30"
+}
+
+document.addEventListener("visibilitychange",function(){
+
+if(document.hidden){
+
+warning++
+
+if(warning==1){
+alert("ห้ามออกจากหน้าจอสอบ! ครั้งที่ 1")
+}
+
+else if(warning>=2){
+alert("คุณถูกตัดสิทธิ์สอบ")
+
+localStorage.setItem("ban_"+emailUser,true)
+
+location.reload()
+}
+
+}
+
+})
+
+</script>
+
+</body>
+</html>
